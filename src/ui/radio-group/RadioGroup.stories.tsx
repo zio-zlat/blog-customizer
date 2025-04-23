@@ -27,6 +27,7 @@ const RadioGroupWithState = () => {
 				onChange={setSelected}
 				options={options}
 				title='Название радиогруппы'
+				optionName='fontSizeOption'
 			/>
 		</>
 	);
