@@ -3,6 +3,7 @@ import { Button } from 'src/ui/button';
 import { Select } from 'src/ui/select';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
+import { Text } from 'src/ui/text';
 import {
 	fontFamilyOptions,
 	fontSizeOptions,
@@ -18,38 +19,36 @@ import styles from './ArticleParamsForm.module.scss';
 import clsx from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';
 
-type FormProps = {
-	applyData: (pageStyles: ArticleStateType) => void;
-	clearData: () => void;
+type ArticleParamsFormProps = {
+	setPageStyles: (selectValues: ArticleStateType) => void;
 };
 
-export const ArticleParamsForm = (props: FormProps) => {
-	const { applyData, clearData } = props;
-	const [isOpen, setIsOpen] = useState(false);
+export const ArticleParamsForm = ({
+	setPageStyles,
+}: ArticleParamsFormProps) => {
+	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const [selectValues, setSelectValues] = useState(defaultArticleState);
 	const sidebar = useRef<HTMLElement>(null);
 
-	const openForm = () => {
-		if (!isOpen) {
-			setIsOpen(true);
-		} else {
-			setIsOpen(false);
-		}
+	const toggleMenu = () => {
+		setIsSidebarOpen(!isSidebarOpen);
 	};
 
 	useEffect(() => {
 		const closeByClick = (event: MouseEvent) => {
 			if (!sidebar.current?.contains(event.target as Node)) {
-				setIsOpen(false);
+				setIsSidebarOpen(false);
 			}
 		};
 
-		if (isOpen) {
+		if (isSidebarOpen) {
 			document.addEventListener('mousedown', closeByClick);
+		} else {
+			document.removeEventListener('mousedown', closeByClick);
 		}
 
 		return () => document.removeEventListener('mousedown', closeByClick);
-	}, [isOpen]);
+	}, [isSidebarOpen]);
 
 	const changeValues = (select: OptionType, optionName: string) => {
 		setSelectValues({ ...selectValues, [optionName]: select });
@@ -57,24 +56,31 @@ export const ArticleParamsForm = (props: FormProps) => {
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		applyData(selectValues);
-		setIsOpen(false);
+		setPageStyles(selectValues);
+		setIsSidebarOpen(false);
 	};
 
 	const handleClear = () => {
-		clearData();
 		setSelectValues(defaultArticleState);
-		setIsOpen(false);
+		setPageStyles(defaultArticleState);
+		setIsSidebarOpen(false);
 	};
 
 	return (
 		<>
-			<ArrowButton isOpen={isOpen} onClick={openForm} />
+			<ArrowButton isOpen={isSidebarOpen} onClick={toggleMenu} />
 			<aside
 				ref={sidebar}
-				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
-				<form className={styles.form} onSubmit={handleSubmit}>
-					<p className={styles.form_header}>Задайте параметры</p>
+				className={clsx(styles.container, {
+					[styles.container_open]: isSidebarOpen,
+				})}>
+				<form
+					className={styles.form}
+					onSubmit={handleSubmit}
+					onReset={handleClear}>
+					<Text as='h2' size={31} weight={800} uppercase>
+						Задайте параметры
+					</Text>
 					<Select
 						selected={selectValues.fontFamilyOption}
 						options={fontFamilyOptions}
@@ -113,12 +119,7 @@ export const ArticleParamsForm = (props: FormProps) => {
 						optionName='contentWidth'
 					/>
 					<div className={styles.bottomContainer}>
-						<Button
-							title='Сбросить'
-							htmlType='reset'
-							type='clear'
-							onClick={handleClear}
-						/>
+						<Button title='Сбросить' htmlType='reset' type='clear' />
 						<Button title='Применить' htmlType='submit' type='apply' />
 					</div>
 				</form>
