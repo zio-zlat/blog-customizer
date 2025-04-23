@@ -15,13 +15,22 @@ type SelectProps = {
 	selected: OptionType | null;
 	options: OptionType[];
 	placeholder?: string;
-	onChange?: (selected: OptionType) => void;
+	onChange?: (selected: OptionType, optionName: string) => void;
 	onClose?: () => void;
 	title?: string;
+	optionName: string;
 };
 
 export const Select = (props: SelectProps) => {
-	const { options, placeholder, selected, onChange, onClose, title } = props;
+	const {
+		options,
+		placeholder,
+		selected,
+		onChange,
+		onClose,
+		title,
+		optionName,
+	} = props;
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const rootRef = useRef<HTMLDivElement>(null);
 	const placeholderRef = useRef<HTMLDivElement>(null);
@@ -41,7 +50,7 @@ export const Select = (props: SelectProps) => {
 
 	const handleOptionClick = (option: OptionType) => {
 		setIsOpen(false);
-		onChange?.(option);
+		onChange?.(option, optionName);
 	};
 	const handlePlaceHolderClick: MouseEventHandler<HTMLDivElement> = () => {
 		setIsOpen((isOpen) => !isOpen);
@@ -72,7 +81,8 @@ export const Select = (props: SelectProps) => {
 					onClick={handlePlaceHolderClick}
 					role='button'
 					tabIndex={0}
-					ref={placeholderRef}>
+					ref={placeholderRef}
+					data-name={optionName}>
 					<Text
 						family={
 							isFontFamilyClass(selected?.className)
